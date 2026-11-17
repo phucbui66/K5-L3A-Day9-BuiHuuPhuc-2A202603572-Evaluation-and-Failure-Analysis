@@ -13,6 +13,7 @@ written by this script only -- never edit reports/ by hand.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import platform
 import tempfile
@@ -104,9 +105,16 @@ def run_eval(shape: str, spec: dict[str, Any], seeds: list[int] | None = None) -
                      "cost": float(c.output["result"].get("cost_estimate") or 0.0)})
     failures = [f"{c.name}:{f.name}:{f.error_message[:80]}" for c in report.cases for f in c.evaluator_failures]
     eval_set_sha = evalset.sha12(Path(spec["eval_set"]))
+    source_digest = hashlib.sha256()
+    for path in sorted([*Path("lab8").rglob("*.py"), *Path("lab9").glob("*.py")]):
+        source_digest.update(path.as_posix().encode())
+        source_digest.update(path.read_text(encoding="utf-8").encode("utf-8"))
     run_id = f"E-{shape}-{date.today():%Y%m%d}-{eval_set_sha[:4]}"
     return {"run_id": run_id, "shape": shape,
             "manifest": {"eval_set": spec["eval_set"], "eval_set_sha": eval_set_sha, "items": len(items),
+                         "labels_sha": evalset.sha12(Path(spec["labels"])),
+                         "source_sha": source_digest.hexdigest()[:12],
+                         "spec_sha": hashlib.sha256(json.dumps(spec, sort_keys=True).encode()).hexdigest()[:12],
                          "seeds": seeds, "metric_spec_version": spec["metric_spec_version"],
                          "llm": "MockLLM", "python": platform.python_version()},
             "rows": rows, "evaluator_failures": failures,
@@ -176,7 +184,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"  not writing {out}: a report with broken graders must not become a baseline")
         return 2
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps(rep, ensure_ascii=False, indent=2), encoding="utf-8")
+    out.write_text(json.dumps(rep, ensure_ascii=False, indent=2), encoding="utf-8", newline="\n")
     print(f"wrote {out}")
     return 0
 
