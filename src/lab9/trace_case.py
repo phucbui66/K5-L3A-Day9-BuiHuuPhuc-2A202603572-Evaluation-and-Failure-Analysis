@@ -14,17 +14,16 @@ import tempfile
 from pathlib import Path
 
 from lab8.console import utf8_stdio
-from lab8.db import load_json, load_jsonl
 from lab9 import variants
-from lab9.eval import WORLD, make_task
+from lab9.eval import SPEC, load_spec, load_world, make_task
 
 
-def investigate(shape: str, claim_id: str, seed: int) -> dict:
+def investigate(shape: str, claim_id: str, seed: int, spec_path: Path = SPEC) -> dict:
     variants.register()
-    claims = load_jsonl(Path("data/public_claims.jsonl"))
+    world, claims = load_world(load_spec(spec_path))
     labels = {c["claim_id"]: c["expected"] for c in claims}
     with tempfile.TemporaryDirectory(prefix="lab9-case-", ignore_cleanup_errors=True) as tmp:
-        trial = make_task(shape, load_json(WORLD), claims, labels, Path(tmp))({"claim_id": claim_id, "seed": seed})
+        trial = make_task(shape, world, claims, labels, Path(tmp))({"claim_id": claim_id, "seed": seed})
     return {"trial": trial, "label": labels[claim_id]}
 
 
@@ -34,8 +33,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--shape", required=True)
     ap.add_argument("--claim", required=True)
     ap.add_argument("--seed", type=int, default=11)
+    ap.add_argument("--spec", default=str(SPEC), help="v2 spec includes adversarial claims")
     args = ap.parse_args(argv)
-    case = investigate(args.shape, args.claim, args.seed)
+    case = investigate(args.shape, args.claim, args.seed, Path(args.spec))
     t, label = case["trial"], case["label"]
     print(f"== {args.shape} {args.claim}@{args.seed}  lab8 grader: {'PASS' if t['lab8_pass'] else 'FAIL'} ({t['lab8_reason']})")
     print("-- trace (step, kind, payload)")
