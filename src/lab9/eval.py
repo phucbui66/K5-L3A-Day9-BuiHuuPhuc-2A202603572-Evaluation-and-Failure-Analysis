@@ -108,7 +108,7 @@ def run_eval(shape: str, spec: dict[str, Any], seeds: list[int] | None = None) -
     source_digest = hashlib.sha256()
     for path in sorted([*Path("lab8").rglob("*.py"), *Path("lab9").glob("*.py")]):
         source_digest.update(path.as_posix().encode())
-        source_digest.update(path.read_bytes())
+        source_digest.update(path.read_text(encoding="utf-8").encode("utf-8"))
     run_id = f"E-{shape}-{date.today():%Y%m%d}-{eval_set_sha[:4]}"
     return {"run_id": run_id, "shape": shape,
             "manifest": {"eval_set": spec["eval_set"], "eval_set_sha": eval_set_sha, "items": len(items),
@@ -184,7 +184,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"  not writing {out}: a report with broken graders must not become a baseline")
         return 2
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps(rep, ensure_ascii=False, indent=2), encoding="utf-8")
+    out.write_text(json.dumps(rep, ensure_ascii=False, indent=2), encoding="utf-8", newline="\n")
     print(f"wrote {out}")
     return 0
 

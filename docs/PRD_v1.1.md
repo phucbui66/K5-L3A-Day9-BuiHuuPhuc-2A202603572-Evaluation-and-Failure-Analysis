@@ -1,10 +1,10 @@
 # PRD v1.1 — tiêu chí đánh giá LogiX-VN
 
-Baseline v1: **E-swarm-20261117-d694**, eval SHA `d6948399d40c`, labels SHA `8ec43bda7384`, source SHA `fecc78b2ba7e`, spec SHA `e6670dd5c7f1`.
+Baseline v1: **E-swarm-20261117-ec06**, eval SHA `ec06ea074f14`, labels SHA `5c39cb294873`, source SHA `6c3324ac3050`, spec SHA `e6670dd5c7f1`.
 
-Fixed: **E-fixed-20261117-d694**. Regression: **E-seeded_regression-20261117-d694**.
+Fixed: **E-fixed-20261117-ec06**. Regression: **E-seeded_regression-20261117-ec06**.
 
-Baseline v2: **E-swarm-20261117-9965**, eval SHA `99657a1f9625`, labels SHA `a86f90a9d694`.
+Baseline v2: **E-swarm-20261117-16a0**, eval SHA `16a09d0c71c1`, labels SHA `e8b49b4ec49f`.
 
 ## Thay đổi so với v1.0
 

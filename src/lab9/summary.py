@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 from lab9.eval import load_spec, per_item
@@ -130,6 +131,18 @@ def main() -> int:
           "[Eval card](eval_card.md), [PRD](PRD_v1.1.md), [judge audit](judge_audit.md).\n\n"
           "Chưa khẳng định GitHub Actions xanh cho tới khi workflow thực sự chạy trên remote. "
           "Giới hạn: MockLLM, tập nhỏ, judge replay; không có phê duyệt production.\n")
+    evidence_path = docs / "verification.md"
+    if evidence_path.is_file():
+        blocks = re.findall(r"```text\n(.*?)\n```", evidence_path.read_text(encoding="utf-8"), re.S)
+        mutation_blocks = [b for b in blocks if b.startswith("$ python -m lab9.mutation")
+                           and ("--aa " in b or "--baseline " in b)]
+        trap_blocks = [b for b in blocks if b.startswith("$ python -m lab9.gate --pr reports/traps/")]
+        pr += "\n## Output thực tế để đối chiếu\n\n"
+        pr += "\n\n".join("```text\n" + b + "\n```" for b in mutation_blocks)
+        if trap_blocks:
+            verdicts = [b.splitlines()[0] + "\n" + next(line for line in reversed(b.splitlines())
+                        if line.startswith("exit 1")) for b in trap_blocks]
+            pr += "\n\n### Bốn trap đều trả exit 1\n\n```text\n" + "\n".join(verdicts) + "\n```\n"
     (docs / "pr_description.md").write_text(pr, encoding="utf-8")
     print("wrote docs/eval_card.md, docs/PRD_v1.1.md, docs/pr_description.md from reports")
     return 0

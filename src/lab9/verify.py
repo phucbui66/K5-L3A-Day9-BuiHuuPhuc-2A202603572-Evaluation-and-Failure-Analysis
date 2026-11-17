@@ -54,7 +54,7 @@ def main() -> int:
         commands.append(("lab9.gate", args, 1))
     commands.append(("lab9.summary", [], 0))
     env = {**os.environ, "PYTHONUTF8": "1", "PYTHONIOENCODING": "utf-8"}
-    with target.open("w", encoding="utf-8") as log:
+    with target.open("w", encoding="utf-8", newline="\n") as log:
         log.write("# Biên bản kiểm tra M0–M7\n\nSinh tự động bằng `python -m lab9.verify`; "
                   "exit 1 được mong đợi cho helpful, regression và trap.\n\n")
         for i, (module, args, expected) in enumerate(commands, 1):
@@ -63,7 +63,8 @@ def main() -> int:
             result = subprocess.run([sys.executable, "-m", module, *args], env=env,
                 cwd=root, text=True, encoding="utf-8", stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
             print(result.stdout, end="", flush=True)
-            log.write(f"## {i}. {module}\n\n```text\n$ {display}\n{result.stdout}"
+            clean_output = "\n".join(line.rstrip() for line in result.stdout.splitlines()) + "\n"
+            log.write(f"## {i}. {module}\n\n```text\n$ {display}\n{clean_output}"
                       f"exit code: {result.returncode}; expected: {expected}\n```\n\n")
             log.flush()
             good = result.returncode == expected

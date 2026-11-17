@@ -177,3 +177,16 @@ def test_advanced_quiet_override_is_caught_without_an_override_event():
     assert DbFactKept().evaluate(ctx).value is True
     assert RefundAmountCorrect().evaluate(ctx).value is False
     assert case["trial"]["lab8_pass"] is False
+
+
+def test_evalset_build_has_portable_lf_bytes(tmp_path, monkeypatch):
+    """Windows CRLF conversion must not change dataset/label hashes in Linux CI."""
+    from pathlib import Path
+    from lab9 import evalset
+    paths = [tmp_path / name for name in ("items1.jsonl", "labels1.json", "items2.jsonl", "labels2.json")]
+    for name, path in zip(("ITEMS", "LABELS", "ITEMS_V2", "LABELS_V2"), paths):
+        monkeypatch.setattr(evalset, name, path)
+    evalset.build(source=Path("data/public_claims.jsonl"))
+    evalset.build_v2(items_v1=paths[0], labels_v1=paths[1])
+    for path in paths:
+        assert b"\r" not in path.read_bytes()

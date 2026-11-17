@@ -50,8 +50,15 @@ Các variant và trap giảng viên cung cấp được giữ nguyên. JSON repo
 
 Nhánh bài làm: `starter/d09`, PR đích: `main`. Hai baseline và các report kết quả chính được cho phép theo dõi trong Git;
 trace, DB, môi trường ảo, secret và trap tạm vẫn bị loại trừ.
+PR đã mở: [#1 — Lab 9 M0–M7](https://github.com/phucbui66/K5-L3A-Day9-BuiHuuPhuc-2A202603572-Evaluation-and-Failure-Analysis/pull/1).
 Dùng [mô tả PR](docs/pr_description.md) và bổ sung output trong [biên bản](docs/verification.md) khi mở PR.
 Kết quả local không thay thế trạng thái GitHub Actions thực tế.
+
+## Lỗi kỹ thuật đã xử lý
+
+Trên Windows, ghi tệp văn bản mặc định tạo CRLF, trong khi Git chuẩn hóa LF. Điều đó làm SHA của eval set/labels trong baseline khác bản checkout Linux.
+Bộ dựng hiện ghi LF rõ ràng, report được sinh lại bằng harness, và source digest chuẩn hóa xuống dòng khi đọc.
+Test `test_evalset_build_has_portable_lf_bytes` kiểm tra cả bốn tệp item/label v1/v2; SHA bản làm việc, Git và baseline được đối chiếu bằng nhau.
 
 ## Công cụ hỗ trợ
 
